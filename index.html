@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clinical & Biomedical Analytics Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-cyan-500 flex items-center justify-center shadow-glow-cyan">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white leading-tight">Clinical & Biomedical Analytics</h1>
+          <p class="text-xs text-slate-400">Healthcare Data Intelligence Platform · Biomedical Engineering Perspective</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="data-badge" class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium border border-cyan-500/20">
+          100 Patient Records
+        </span>
+        <span id="last-updated" class="text-xs text-slate-500"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-screen-2xl mx-auto px-6 py-6 space-y-6">
+
+    <!-- Filter Bar -->
+    <section class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="filter-group">
+          <label class="filter-label">Gender</label>
+          <select id="filter-gender" class="filter-select">
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Age Group</label>
+          <select id="filter-age" class="filter-select">
+            <option value="">All Ages</option>
+            <option value="0-17">0–17 (Pediatric)</option>
+            <option value="18-35">18–35 (Young Adult)</option>
+            <option value="36-55">36–55 (Middle Age)</option>
+            <option value="56-70">56–70 (Senior)</option>
+            <option value="71+">71+ (Elderly)</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Medical Condition</label>
+          <select id="filter-condition" class="filter-select">
+            <option value="">All Conditions</option>
+            <option value="Arthritis">Arthritis</option>
+            <option value="Asthma">Asthma</option>
+            <option value="Cancer">Cancer</option>
+            <option value="Diabetes">Diabetes</option>
+            <option value="Hypertension">Hypertension</option>
+            <option value="Obesity">Obesity</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Admission Type</label>
+          <select id="filter-admission" class="filter-select">
+            <option value="">All Types</option>
+            <option value="Emergency">Emergency</option>
+            <option value="Elective">Elective</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Test Results</label>
+          <select id="filter-test" class="filter-select">
+            <option value="">All Results</option>
+            <option value="Normal">Normal</option>
+            <option value="Abnormal">Abnormal</option>
+            <option value="Inconclusive">Inconclusive</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Medication</label>
+          <select id="filter-medication" class="filter-select">
+            <option value="">All Medications</option>
+            <option value="Aspirin">Aspirin</option>
+            <option value="Ibuprofen">Ibuprofen</option>
+            <option value="Lipitor">Lipitor</option>
+            <option value="Paracetamol">Paracetamol</option>
+            <option value="Penicillin">Penicillin</option>
+          </select>
+        </div>
+        <button id="reset-filters" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-medium transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Reset
+        </button>
+        <div id="filter-count" class="ml-auto text-xs text-slate-400 self-center"></div>
+      </div>
+    </section>
+
+    <!-- KPI Cards -->
+    <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon bg-cyan-500/10 text-cyan-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div>
+          <p class="kpi-label">Total Patients</p>
+          <p class="kpi-value" id="kpi-total">—</p>
+          <p class="kpi-sub">Active records</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="kpi-icon bg-violet-500/10 text-violet-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <div>
+          <p class="kpi-label">Average Age</p>
+          <p class="kpi-value" id="kpi-age">—</p>
+          <p class="kpi-sub">Years old</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon bg-emerald-500/10 text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div>
+          <p class="kpi-label">Avg. Length of Stay</p>
+          <p class="kpi-value" id="kpi-los">—</p>
+          <p class="kpi-sub">Days per patient</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon bg-amber-500/10 text-amber-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <div>
+          <p class="kpi-label">Total Medical Records</p>
+          <p class="kpi-value" id="kpi-records">—</p>
+          <p class="kpi-sub">Clinical entries</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-rose">
+        <div class="kpi-icon bg-rose-500/10 text-rose-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <p class="kpi-label">Avg. Billing Amount</p>
+          <p class="kpi-value" id="kpi-billing">—</p>
+          <p class="kpi-sub">USD per patient</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 1: Medical Condition + Admission Type + Test Results -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="chart-card col-span-1">
+        <div class="chart-header">
+          <h3 class="chart-title">Medical Condition Distribution</h3>
+          <span class="chart-badge">Prevalence</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="chart-condition"></canvas>
+        </div>
+      </div>
+      <div class="chart-card col-span-1">
+        <div class="chart-header">
+          <h3 class="chart-title">Admission Type Breakdown</h3>
+          <span class="chart-badge">Triage</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="chart-admission"></canvas>
+        </div>
+      </div>
+      <div class="chart-card col-span-1">
+        <div class="chart-header">
+          <h3 class="chart-title">Test Results Distribution</h3>
+          <span class="chart-badge">Diagnostics</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="chart-test"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 2: Gender + Age Group distribution -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Patient Age Group Distribution</h3>
+          <span class="chart-badge">Demographics</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-age"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Gender Distribution by Condition</h3>
+          <span class="chart-badge">Gender Analysis</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-gender-condition"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 3: Medication + Billing by Condition -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Medication Frequency</h3>
+          <span class="chart-badge">Pharmacology</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-medication"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Avg. Billing Amount by Condition</h3>
+          <span class="chart-badge">Health Economics</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-billing-condition"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 4: Length of Stay + Insurance Provider -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Avg. Length of Stay by Condition</h3>
+          <span class="chart-badge">Hospitalization</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-los"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Insurance Provider Distribution</h3>
+          <span class="chart-badge">Coverage</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-insurance"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 5: Blood Type + Admission Trend over Years -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Blood Type Frequency</h3>
+          <span class="chart-badge">Hematology</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-blood"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Admissions by Year</h3>
+          <span class="chart-badge">Trend Analysis</span>
+        </div>
+        <div class="chart-body h-60">
+          <canvas id="chart-trend"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 6: Test Result by Condition heatmap-style + Medication by Condition -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Test Result by Admission Type</h3>
+          <span class="chart-badge">Clinical Outcomes</span>
+        </div>
+        <div class="chart-body h-64">
+          <canvas id="chart-test-admission"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Billing Distribution (Scatter)</h3>
+          <span class="chart-badge">Age vs Billing</span>
+        </div>
+        <div class="chart-body h-64">
+          <canvas id="chart-scatter"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Patient Records Table -->
+    <section class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Patient Records</h3>
+        <span id="table-count" class="chart-badge"></span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="patient-table">
+          <thead>
+            <tr class="border-b border-slate-800">
+              <th class="table-th">Patient Name</th>
+              <th class="table-th">Age</th>
+              <th class="table-th">Gender</th>
+              <th class="table-th">Blood Type</th>
+              <th class="table-th">Condition</th>
+              <th class="table-th">Admission</th>
+              <th class="table-th">Admission Type</th>
+              <th class="table-th">LOS (Days)</th>
+              <th class="table-th">Medication</th>
+              <th class="table-th">Test Result</th>
+              <th class="table-th text-right">Billing (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-6 text-xs text-slate-600 border-t border-slate-800 mt-4">
+    Clinical & Biomedical Data Analytics Dashboard · Biomedical Engineering Department · Data sourced from healthcare_data.json
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
