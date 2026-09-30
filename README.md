@@ -138,7 +138,7 @@ http://127.0.0.1:5500/index.html
 
 ## About the Data
 
-The dashboard uses the [Healthcare Dataset]([YOUR-KAGGLE-LINK](https://www.kaggle.com/datasets/prasad22/healthcare-dataset) from Kaggle, released under the **CC0: Public Domain** license.
+The dashboard uses the [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset) from Kaggle, released under the **CC0: Public Domain** license.
 
 The dataset contains **synthetic patient records generated with Python's Faker library**, so the records do not represent real patients.
 
